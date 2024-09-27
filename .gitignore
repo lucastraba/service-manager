@@ -1,0 +1,20 @@
+# Dependency directories
+node_modules
+
+# Build directories
+dist
+
+# Local environment variables
+.env.local
+.env.*.local
+
+# Generated directories and files
+/tmp
+/coverage
+.eslintcache
+
+# Editor directories and files
+.idea
+.vscode
+/helper
+.DS_Store
