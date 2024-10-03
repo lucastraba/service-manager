@@ -235,7 +235,18 @@ describe('ServiceManager', () => {
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassSimple);
     });
-
+    it('successfully loads a service using the SERVICES object in the serviceManager', async () => {
+      // Arrange.
+      const serviceManager = new ServiceManager<Services>({
+        serviceDefinitions: [serviceDefinitionMocks.onlyRequiredProperties],
+      });
+      // Act.
+      const myService = await serviceManager.loadService(
+        serviceManager.SERVICES.MyServiceClassSimple
+      );
+      // Assert.
+      expect(myService).toBeInstanceOf(MyServiceClassSimple);
+    });
     it('successfully loads a service with injections', async () => {
       // Arrange.
       const serviceManager = new ServiceManager<Services>({

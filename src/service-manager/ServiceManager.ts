@@ -28,7 +28,7 @@ import type {
  *
  * 2. If available, we add it to the declaration file, so that {@link ServiceManager.SERVICES} can auto-complete.
  * ```ts
- * // ServiceManagerq.d.ts
+ * // ServiceManager.d.ts
  * declare module '@lucastraba/service-manager' {
  *  type Service = {
  *    MyClass: 'MyClass';
@@ -69,16 +69,26 @@ import type {
  * ```
  */
 export default class ServiceManager<TServices extends ServiceMap> {
-  public SERVICES: Record<Extract<keyof TServices, string>, string> =
-    {} as Record<Extract<keyof TServices, string>, string>;
+  public SERVICES: { [K in Extract<keyof TServices, string>]: K } = {} as {
+    [K in Extract<keyof TServices, string>]: K;
+  };
   private dependencyResolver = new DependencyResolver<TServices>();
   private loadedServices: LoadedService = {};
 
+  /**
+   * Initializes the ServiceManager with the provided configuration.
+   * @param config - The configuration object containing service definitions.
+   */
   constructor({ serviceDefinitions }: ServiceManagerConfig<TServices>) {
     this.dependencyResolver.serviceDefinitions = serviceDefinitions;
     this.populateAvailableServiceNames(serviceDefinitions);
   }
 
+  /**
+   * Loads a service by its instance name.
+   * @param serviceInstanceName - The name of the service instance to load.
+   * @returns A promise that resolves to the loaded service instance.
+   */
   public async loadService<K extends keyof TServices>(
     serviceInstanceName: K
   ): Promise<TServices[K]> {
@@ -87,6 +97,11 @@ export default class ServiceManager<TServices extends ServiceMap> {
     )) as TServices[K];
   }
 
+  /**
+   * Loads multiple services by their instance names.
+   * @param serviceInstanceNames - An array of service instance names to load.
+   * @returns A promise that resolves to an array of loaded service instances.
+   */
   public async loadServices<K extends keyof TServices>(
     serviceInstanceNames: K[] = []
   ): Promise<TServices[K][]> {
@@ -97,13 +112,13 @@ export default class ServiceManager<TServices extends ServiceMap> {
   private populateAvailableServiceNames(
     serviceDefinitions: ServiceDefinition<TServices>[]
   ) {
-    this.SERVICES = {} as Record<Extract<keyof TServices, string>, string>;
+    this.SERVICES = {} as { [K in Extract<keyof TServices, string>]: K };
     serviceDefinitions.forEach((serviceDefinition) => {
       const serviceName =
         serviceDefinition.serviceInstanceName ??
         serviceDefinition.serviceClassName;
       this.SERVICES[serviceName as Extract<keyof TServices, string>] =
-        serviceName as string;
+        serviceName as Extract<keyof TServices, string>;
     });
   }
 
