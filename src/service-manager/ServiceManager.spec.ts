@@ -1,4 +1,3 @@
-import DependencyResolver from './DependencyResolver';
 import ServiceManager from './ServiceManager';
 import {
   DefinitionNotFoundError,
@@ -90,16 +89,28 @@ const dependencyBetaPathMock = vi
   .fn()
   .mockResolvedValue({ default: MyDependencyBetaClass });
 
+type Services = {
+  MyServiceClassSimple: MyServiceClassSimple;
+  MyServiceClassInjection: MyServiceClassInjection;
+  MyServiceClassInjectionInvertedArgs: MyServiceClassInjectionInvertedArgs;
+  MyDependencyAlphaClass: MyDependencyAlphaClass;
+  MyDependencyBetaClass: MyDependencyBetaClass;
+  InvalidService: never;
+  InvalidInjection: never;
+  myService: MyServiceClassInjection;
+  myOtherService: MyServiceClassInjection;
+};
+
 const serviceDefinitionMocks = {
   onlyRequiredProperties: {
     serviceClassName: 'MyServiceClassSimple',
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withServiceInstanceName: {
     serviceInstanceName: 'myService',
     serviceClassName: 'MyServiceClassSimple',
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withServiceInjections: {
     serviceClassName: 'MyServiceClassInjection',
     serviceInjections: [
@@ -107,7 +118,7 @@ const serviceDefinitionMocks = {
       { customInjection: injectionValueAlpha },
     ],
     pathToService: injectedServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withInvertedServiceInjections: {
     serviceClassName: 'MyServiceClassInjectionInvertedArgs',
     serviceInjections: [
@@ -115,7 +126,7 @@ const serviceDefinitionMocks = {
       { serviceInstanceName: 'MyDependencyAlphaClass' },
     ],
     pathToService: invertedInjectionServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withAllProperties: {
     serviceInstanceName: 'myService',
     serviceClassName: 'MyServiceClassInjection',
@@ -125,7 +136,7 @@ const serviceDefinitionMocks = {
     ],
     postBuildAsyncActions: ['postBuildMethod'],
     pathToService: injectedServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withServiceDifferentInstanceName: {
     serviceInstanceName: 'myOtherService',
     serviceClassName: 'MyServiceClassInjection',
@@ -134,17 +145,17 @@ const serviceDefinitionMocks = {
       { customInjection: injectionValueBeta },
     ],
     pathToService: injectedServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withPostBuildAction: {
     serviceClassName: 'MyServiceClassSimple',
     postBuildAsyncActions: ['postBuildMethod'],
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withInvalidPostBuildAction: {
     serviceClassName: 'MyServiceClassSimple',
     postBuildAsyncActions: ['nonExistentMethod'],
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   withInvalidInjectionKey: {
     serviceClassName: 'InvalidInjection',
     serviceInjections: [{ invalid: '' }],
@@ -159,117 +170,111 @@ const serviceDefinitionMocks = {
     serviceClassName: 'MyServiceClassSimple',
     postBuildAsyncActions: ['nonExistentMethod'],
     pathToService: vi.fn().mockRejectedValue('error'),
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   dependencyDefinitionAlpha: {
     serviceClassName: 'MyDependencyAlphaClass',
     pathToService: dependencyAlphaPathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
   dependencyDefinitionBeta: {
     serviceClassName: 'MyDependencyBetaClass',
     pathToService: dependencyBetaPathMock,
-  } as ServiceDefinition,
+  } as ServiceDefinition<Services>,
 };
 
 describe('ServiceManager', () => {
-  beforeEach(async () => {
-    ServiceManager.reset();
+  beforeEach(() => {
     vi.clearAllMocks();
   });
+
   describe('initialize', () => {
     it('initializes with definitions', async () => {
       // Arrange.
-      // Act.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.onlyRequiredProperties,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
         ],
       });
+      // Act.
       // Assert.
-      expect(DependencyResolver.serviceDefinitions).toStrictEqual([
+      expect(
+        serviceManager['dependencyResolver'].serviceDefinitions
+      ).toStrictEqual([
         serviceDefinitionMocks.onlyRequiredProperties,
         serviceDefinitionMocks.dependencyDefinitionAlpha,
       ]);
     });
+
     it('populates the services object', async () => {
       // Arrange.
-      // Act.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.onlyRequiredProperties,
           serviceDefinitionMocks.withServiceInstanceName,
         ],
       });
+      // Act.
       // Assert.
-      expect(ServiceManager.SERVICES).toStrictEqual({
+      expect(serviceManager.SERVICES).toStrictEqual({
         MyServiceClassSimple: 'MyServiceClassSimple',
         myService: 'myService',
       });
     });
   });
+
   describe('loadService', () => {
     it('successfully loads a simple service', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [serviceDefinitionMocks.onlyRequiredProperties],
       });
       // Act.
-      const myService = (await ServiceManager.loadService(
+      const myService = await serviceManager.loadService(
         'MyServiceClassSimple'
-      )) as MyServiceClassSimple;
+      );
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassSimple);
     });
-    it('successfully loads a simple service, even if the instance was deleted', async () => {
-      // Arrange.
-      await ServiceManager.initialize({
-        serviceDefinitions: [serviceDefinitionMocks.onlyRequiredProperties],
-      });
-      ServiceManager['instance'] = null;
-      // Act.
-      const myService = (await ServiceManager.loadService(
-        'MyServiceClassSimple'
-      )) as MyServiceClassSimple;
-      // Assert.
-      expect(myService).toBeInstanceOf(MyServiceClassSimple);
-    });
+
     it('successfully loads a service with injections', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.withServiceInjections,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
         ],
       });
       // Act.
-      const myService = (await ServiceManager.loadService(
+      const myService = await serviceManager.loadService(
         'MyServiceClassInjection'
-      )) as MyServiceClassInjection;
+      );
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassInjection);
       expect(myService.callDependencyMethod()).toBe(dependencyReturnValueAlpha);
       expect(myService.getInjectionValue()).toBe(injectionValueAlpha);
     });
+
     it('successfully loads a service with inverted injections', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.withInvertedServiceInjections,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
         ],
       });
       // Act.
-      const myService = (await ServiceManager.loadService(
+      const myService = await serviceManager.loadService(
         'MyServiceClassInjectionInvertedArgs'
-      )) as MyServiceClassInjectionInvertedArgs;
+      );
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassInjectionInvertedArgs);
       expect(myService.callDependencyMethod()).toBe(dependencyReturnValueAlpha);
       expect(myService.getInjectionValue()).toBe(injectionValueAlpha);
     });
+
     it('successfully loads a service with different instance name', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.withAllProperties,
           serviceDefinitionMocks.withServiceDifferentInstanceName,
@@ -278,12 +283,8 @@ describe('ServiceManager', () => {
         ],
       });
       // Act.
-      const myService = (await ServiceManager.loadService(
-        'myService'
-      )) as MyServiceClassInjection;
-      const myOtherService = (await ServiceManager.loadService(
-        'myOtherService'
-      )) as MyServiceClassInjection;
+      const myService = await serviceManager.loadService('myService');
+      const myOtherService = await serviceManager.loadService('myOtherService');
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassInjection);
       expect(myOtherService).toBeInstanceOf(MyServiceClassInjection);
@@ -294,42 +295,45 @@ describe('ServiceManager', () => {
       expect(myService.getInjectionValue()).toBe(injectionValueAlpha);
       expect(myOtherService.getInjectionValue()).toBe(injectionValueBeta);
     });
+
     it('successfully loads a service with post build action', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [serviceDefinitionMocks.withPostBuildAction],
       });
       // Act.
-      const myService = (await ServiceManager.loadService(
+      const myService = await serviceManager.loadService(
         'MyServiceClassSimple'
-      )) as MyServiceClassSimple;
+      );
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassSimple);
       expect(mockPostBuildAction).toHaveBeenCalledOnce();
     });
+
     it('instantiates a service only once', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.withServiceInjections,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
         ],
       });
       // Act.
-      await ServiceManager.loadService('MyDependencyAlphaClass');
-      await ServiceManager.loadService('MyServiceClassInjection');
+      await serviceManager.loadService('MyDependencyAlphaClass');
+      await serviceManager.loadService('MyServiceClassInjection');
       // Assert.
       expect(instantiationSpy).toHaveBeenCalledOnce();
     });
+
     it('throws an error if service definition is not found', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [],
       });
       let error: Maybe<DefinitionNotFoundError>;
       // Act.
       try {
-        await ServiceManager.loadService('InvalidService');
+        await serviceManager.loadService('InvalidService');
       } catch (err) {
         error = err as DefinitionNotFoundError;
       }
@@ -340,15 +344,16 @@ describe('ServiceManager', () => {
         'Could not find service definition for instance name "InvalidService".'
       );
     });
+
     it('throws an error if injection is invalid (only possible outside Typescript)', async () => {
       // Arrange.
       let error: Maybe<InvalidInjectionError>;
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [serviceDefinitionMocks.withInvalidInjectionKey],
       });
       // Act
       try {
-        await ServiceManager.loadService('InvalidInjection');
+        await serviceManager.loadService('InvalidInjection');
       } catch (err) {
         error = err as DefinitionNotFoundError;
       }
@@ -359,15 +364,16 @@ describe('ServiceManager', () => {
         'Invalid injection object: {"invalid":""}. Only \'serviceInstanceName\' and \'customInjection\' keys are allowed.'
       );
     });
+
     it('throws an error if post build action fails', async () => {
       // Arrange.
       let error: Maybe<InvalidPostBuildActionError>;
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [serviceDefinitionMocks.withInvalidPostBuildAction],
       });
       // Act
       try {
-        await ServiceManager.loadService('MyServiceClassSimple');
+        await serviceManager.loadService('MyServiceClassSimple');
       } catch (err) {
         error = err as InvalidPostBuildActionError;
       }
@@ -378,15 +384,16 @@ describe('ServiceManager', () => {
         'Post build action "nonExistentMethod" failed to execute in MyServiceClassSimple.'
       );
     });
+
     it('throws an error if the pathToService is not found', async () => {
       // Arrange.
       let error: Maybe<PathNotFoundError>;
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [serviceDefinitionMocks.withNotFoundPath],
       });
       // Act
       try {
-        await ServiceManager.loadService('MyServiceClassSimple');
+        await serviceManager.loadService('MyServiceClassSimple');
       } catch (err) {
         error = err as PathNotFoundError;
       }
@@ -397,15 +404,16 @@ describe('ServiceManager', () => {
         'The path specified in the service definition for "MyServiceClassSimple" could not be resolved.'
       );
     });
+
     it('throws an error if the pathToService cannot be resolved', async () => {
       // Arrange.
       let error: Maybe<InvalidPathError>;
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [serviceDefinitionMocks.withInvalidPath],
       });
       // Act
       try {
-        await ServiceManager.loadService('MyServiceClassSimple');
+        await serviceManager.loadService('MyServiceClassSimple');
       } catch (err) {
         error = err as InvalidPathError;
       }
@@ -417,10 +425,11 @@ describe('ServiceManager', () => {
       );
     });
   });
+
   describe('loadServices', () => {
     it('successfully loads multiple services', async () => {
       // Arrange.
-      await ServiceManager.initialize({
+      const serviceManager = new ServiceManager<Services>({
         serviceDefinitions: [
           serviceDefinitionMocks.withServiceInstanceName,
           serviceDefinitionMocks.withServiceInjections,
@@ -428,17 +437,17 @@ describe('ServiceManager', () => {
         ],
       });
       // Act.
-      const [myService, myOtherService] = (await ServiceManager.loadServices([
+      const [myService, myOtherService] = await serviceManager.loadServices([
         'myService',
         'MyServiceClassInjection',
-      ])) as [MyServiceClassSimple, MyServiceClassInjection];
+      ]);
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassSimple);
       expect(myOtherService).toBeInstanceOf(MyServiceClassInjection);
-      expect(myOtherService.callDependencyMethod()).toBe(
+      expect(myOtherService?.callDependencyMethod()).toBe(
         dependencyReturnValueAlpha
       );
-      expect(myOtherService.getInjectionValue()).toBe(injectionValueAlpha);
+      expect(myOtherService?.getInjectionValue()).toBe(injectionValueAlpha);
     });
   });
 });

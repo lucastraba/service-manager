@@ -1,6 +1,6 @@
-export { default as ServiceManager } from './serviceManager/ServiceManager';
+export { default as ServiceManager } from './service-manager/ServiceManager';
 export type {
   ServiceDefinition,
   ServiceInjection,
   ServiceManagerConfig,
-} from './serviceManager/services.type';
+} from './service-manager/services.type';

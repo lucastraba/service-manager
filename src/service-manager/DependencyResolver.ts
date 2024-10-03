@@ -2,19 +2,20 @@ import { InvalidPathError, PathNotFoundError } from './serviceManager.error';
 import type {
   AdaptedServiceDefinition,
   ServiceDefinition,
+  ServiceMap,
 } from './services.type';
 
 /**
  * @internal
  */
-export default class DependencyResolver {
-  public static serviceDefinitions: ServiceDefinition[] = [];
+export default class DependencyResolver<TServices extends ServiceMap> {
+  public serviceDefinitions: ServiceDefinition<TServices>[] = [];
 
   private loadedServiceModules: Record<string, Constructible> = {};
   private serviceModulePromises: Record<string, Promise<Constructible>> = {};
 
   public async resolve(
-    serviceDefinition: AdaptedServiceDefinition
+    serviceDefinition: AdaptedServiceDefinition<TServices>
   ): Promise<void> {
     const unloadedModuleNames =
       this.getUnloadedInjectionNames(serviceDefinition);
@@ -24,13 +25,12 @@ export default class DependencyResolver {
 
   public getServiceDefinition(
     serviceInstanceName: string
-  ): Nullable<ServiceDefinition> {
+  ): Nullable<ServiceDefinition<TServices>> {
     return (
-      DependencyResolver.serviceDefinitions.find(
-        (element: ServiceDefinition) =>
-          element.serviceInstanceName
-            ? element.serviceInstanceName === serviceInstanceName
-            : element.serviceClassName === serviceInstanceName
+      this.serviceDefinitions.find((element: ServiceDefinition<TServices>) =>
+        element.serviceInstanceName
+          ? element.serviceInstanceName === serviceInstanceName
+          : element.serviceClassName === serviceInstanceName
       ) ?? null
     );
   }
@@ -48,7 +48,7 @@ export default class DependencyResolver {
   }
 
   private getUnloadedInjectionNames(
-    serviceDefinition: Nullable<ServiceDefinition>
+    serviceDefinition: Nullable<ServiceDefinition<TServices>>
   ): string[] {
     const unloadedInjectionNames: string[] = [];
     if (!serviceDefinition?.serviceInjections) return unloadedInjectionNames;
@@ -102,8 +102,8 @@ export default class DependencyResolver {
   }
 
   private importServiceFromPath(
-    serviceDefinition: Nullable<ServiceDefinition>
-  ): Nullable<Promise<ModuleWithDefaultExport>> {
+    serviceDefinition: Nullable<ServiceDefinition<TServices>>
+  ): Nullable<Promise<ModuleWithDefaultExport<TServices[keyof TServices]>>> {
     if (!serviceDefinition || !serviceDefinition.pathToService) {
       return null;
     }
