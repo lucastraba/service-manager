@@ -8,26 +8,29 @@ import type {
 /**
  * @internal
  */
-export default class DependencyResolver<TServices extends ServiceMap> {
-  public serviceDefinitions: ServiceDefinition<TServices>[] = [];
+export default class DependencyResolver<
+  TServices extends ServiceMap,
+  TInstances extends Record<string, unknown> = Record<string, unknown>,
+> {
+  public serviceDefinitions: ServiceDefinition<TServices, TInstances>[] = [];
 
   private loadedServiceModules: Record<string, Constructible> = {};
   private serviceModulePromises: Record<string, Promise<Constructible>> = {};
 
   public async resolve(
-    serviceDefinition: AdaptedServiceDefinition<TServices>
+    serviceDefinition: AdaptedServiceDefinition<TServices, TInstances>
   ): Promise<void> {
     const unloadedModuleNames =
       this.getUnloadedInjectionNames(serviceDefinition);
-    unloadedModuleNames.push(serviceDefinition.serviceInstanceName);
+    unloadedModuleNames.push(serviceDefinition.serviceInstanceName as string);
     await this.loadDependencies(unloadedModuleNames);
   }
 
   public getServiceDefinition(
     serviceInstanceName: string
-  ): Nullable<ServiceDefinition<TServices>> {
+  ): Nullable<ServiceDefinition<TServices, TInstances>> {
     return (
-      this.serviceDefinitions.find((element: ServiceDefinition<TServices>) =>
+      this.serviceDefinitions.find((element) =>
         element.serviceInstanceName
           ? element.serviceInstanceName === serviceInstanceName
           : element.serviceClassName === serviceInstanceName
@@ -48,13 +51,14 @@ export default class DependencyResolver<TServices extends ServiceMap> {
   }
 
   private getUnloadedInjectionNames(
-    serviceDefinition: Nullable<ServiceDefinition<TServices>>
+    serviceDefinition: Nullable<ServiceDefinition<TServices, TInstances>>
   ): string[] {
     const unloadedInjectionNames: string[] = [];
     if (!serviceDefinition?.serviceInjections) return unloadedInjectionNames;
     for (const serviceInjection of serviceDefinition.serviceInjections) {
       if (!('serviceInstanceName' in serviceInjection)) continue;
-      const injectionInstanceName = serviceInjection.serviceInstanceName;
+      const injectionInstanceName =
+        serviceInjection.serviceInstanceName as string;
       if (this.isModuleLoaded(injectionInstanceName)) continue;
       const childServiceDefinition = this.getServiceDefinition(
         injectionInstanceName
@@ -102,7 +106,7 @@ export default class DependencyResolver<TServices extends ServiceMap> {
   }
 
   private importServiceFromPath(
-    serviceDefinition: Nullable<ServiceDefinition<TServices>>
+    serviceDefinition: Nullable<ServiceDefinition<TServices, TInstances>>
   ): Nullable<Promise<ModuleWithDefaultExport<TServices[keyof TServices]>>> {
     if (!serviceDefinition || !serviceDefinition.pathToService) {
       return null;

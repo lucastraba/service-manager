@@ -16,109 +16,57 @@ import type {
 /**
  * The ServiceManager is an IoC container.
  * It is responsible for loading services and their dependencies.
- *
- * @example
- * 1. We write the classes we will use.
- * ```ts
- * class MyClass {
- *   constructor(private readonly myDependency: MyDependency){}
- * }
- * class MyDependency {}
- * ```
- *
- * 2. If available, we add it to the declaration file, so that {@link ServiceManager.SERVICES} can auto-complete.
- * ```ts
- * // ServiceManager.d.ts
- * declare module '@lucastraba/service-manager' {
- *  type Service = {
- *    MyClass: 'MyClass';
- *    MyDependency: 'MyDependency';
- *  }
- * }
- * ```
- *
- * 3. We create a definitions file. If the project has set an auto-importing mechanism,
- * make sure that the file is named '*.definition.ts' or whatever naming convention you
- * have defined for the auto-importing.
- * Here, we define a group of {@link ServiceDefinition} objects.
- * ```ts
- * // myDomain.definition.ts
- * const definitions: ServiceDefinition[] = [
- *   {
- *     serviceClassName: ServiceManager.SERVICES.MyClass,
- *     serviceInjections: [
- *       {
- *         serviceInstanceName: ServiceManager.SERVICES.MyDependency,
- *       },
- *     ],
- *     pathToService: async () => import('./MyClass'),
- *   },
- *  {
- *     serviceClassName: ServiceManager.SERVICES.MyDependency,
- *     pathToService: async () => import('./MyDependency'),
- *   },
- * ],
- *
- * export default definitions;
- * ```
- *
- * 4. We use it with {@link ServiceManager.loadService}
- * ```ts
- * // myFunctionality.ts
- * const myCoolService = ServiceManager.loadService(ServiceManager.SERVICES.MyClass) as MyClass;
- * ```
  */
-export default class ServiceManager<TServices extends ServiceMap> {
-  public SERVICES: { [K in Extract<keyof TServices, string>]: K } = {} as {
-    [K in Extract<keyof TServices, string>]: K;
+export default class ServiceManager<
+  TServices extends ServiceMap,
+  TInstances extends Record<string, unknown> = Record<string, unknown>,
+> {
+  public SERVICES: {
+    [K in keyof (TServices & TInstances)]: K;
+  } = {} as {
+    [K in keyof (TServices & TInstances)]: K;
   };
-  private dependencyResolver = new DependencyResolver<TServices>();
+  private dependencyResolver = new DependencyResolver<TServices, TInstances>();
   private loadedServices: LoadedService = {};
 
-  /**
-   * Initializes the ServiceManager with the provided configuration.
-   * @param config - The configuration object containing service definitions.
-   */
-  constructor({ serviceDefinitions }: ServiceManagerConfig<TServices>) {
+  constructor({
+    serviceDefinitions,
+  }: ServiceManagerConfig<TServices, TInstances>) {
     this.dependencyResolver.serviceDefinitions = serviceDefinitions;
     this.populateAvailableServiceNames(serviceDefinitions);
   }
 
-  /**
-   * Loads a service by its instance name.
-   * @param serviceInstanceName - The name of the service instance to load.
-   * @returns A promise that resolves to the loaded service instance.
-   */
-  public async loadService<K extends keyof TServices>(
+  public async loadService<K extends keyof (TServices & TInstances)>(
     serviceInstanceName: K
-  ): Promise<TServices[K]> {
+  ): Promise<(TServices & TInstances)[K]> {
     return (await this.loadServiceInternal(
       serviceInstanceName as string
-    )) as TServices[K];
+    )) as (TServices & TInstances)[K];
   }
 
-  /**
-   * Loads multiple services by their instance names.
-   * @param serviceInstanceNames - An array of service instance names to load.
-   * @returns A promise that resolves to an array of loaded service instances.
-   */
-  public async loadServices<K extends keyof TServices>(
+  public async loadServices<K extends keyof (TServices & TInstances)>(
     serviceInstanceNames: K[] = []
-  ): Promise<TServices[K][]> {
+  ): Promise<(TServices & TInstances)[K][]> {
     const promises = serviceInstanceNames.map((name) => this.loadService(name));
     return await Promise.all(promises);
   }
 
   private populateAvailableServiceNames(
-    serviceDefinitions: ServiceDefinition<TServices>[]
+    serviceDefinitions: ServiceDefinition<TServices, TInstances>[]
   ) {
-    this.SERVICES = {} as { [K in Extract<keyof TServices, string>]: K };
+    this.SERVICES = {} as {
+      [K in keyof (TServices & TInstances)]: K;
+    };
     serviceDefinitions.forEach((serviceDefinition) => {
-      const serviceName =
-        serviceDefinition.serviceInstanceName ??
-        serviceDefinition.serviceClassName;
-      this.SERVICES[serviceName as Extract<keyof TServices, string>] =
-        serviceName as Extract<keyof TServices, string>;
+      const serviceInstanceName = serviceDefinition.serviceInstanceName;
+      const serviceClassName = serviceDefinition.serviceClassName;
+      if (serviceInstanceName) {
+        this.SERVICES[serviceInstanceName as keyof TInstances] =
+          serviceInstanceName as keyof TInstances;
+      } else {
+        this.SERVICES[serviceClassName as keyof TServices] =
+          serviceClassName as keyof TServices;
+      }
     });
   }
 
@@ -138,30 +86,31 @@ export default class ServiceManager<TServices extends ServiceMap> {
     }
     if (!('serviceInstanceName' in serviceDefinition)) {
       serviceDefinition['serviceInstanceName'] =
-        serviceDefinition.serviceClassName;
+        serviceDefinition.serviceClassName as keyof TInstances;
     }
     return await this.getInstanceInternal(
-      serviceDefinition as AdaptedServiceDefinition<TServices>
+      serviceDefinition as AdaptedServiceDefinition<TServices, TInstances>
     );
   }
 
   private async getInstanceInternal(
-    serviceDefinition: AdaptedServiceDefinition<TServices>
+    serviceDefinition: AdaptedServiceDefinition<TServices, TInstances>
   ): Promise<unknown> {
     if (
       !this.dependencyResolver.isModuleLoaded(
-        serviceDefinition.serviceInstanceName
+        serviceDefinition.serviceInstanceName as string
       )
     ) {
       await this.dependencyResolver.resolve(serviceDefinition);
     }
     const instance = await this.createInstance(serviceDefinition);
-    this.loadedServices[serviceDefinition.serviceInstanceName] = instance;
+    this.loadedServices[serviceDefinition.serviceInstanceName as string] =
+      instance;
     return instance;
   }
 
   private async createInstance(
-    serviceDefinition: AdaptedServiceDefinition<TServices>
+    serviceDefinition: AdaptedServiceDefinition<TServices, TInstances>
   ): Promise<unknown> {
     let injections: unknown[] = [];
     if (serviceDefinition.serviceInjections) {
@@ -170,7 +119,7 @@ export default class ServiceManager<TServices extends ServiceMap> {
       );
     }
     const DefinitionConstructor = this.dependencyResolver.getLoadedModule(
-      serviceDefinition.serviceInstanceName
+      serviceDefinition.serviceInstanceName as string
     );
     const instance = new DefinitionConstructor(...injections);
     await this.postBuildActions(
@@ -178,20 +127,20 @@ export default class ServiceManager<TServices extends ServiceMap> {
       instance as Record<string, unknown>
     );
     this.dependencyResolver.deleteModulePromise(
-      serviceDefinition.serviceInstanceName
+      serviceDefinition.serviceInstanceName as string
     );
     return instance;
   }
 
   private async parseInjections(
-    injections: ServiceInjection<TServices>[]
+    injections: ServiceInjection<TInstances>[]
   ): Promise<unknown[]> {
     const loadedInjections: unknown[] = [];
     for (const injection of injections) {
       let loadedInjection = undefined;
       if (this.isServiceInstanceInjection(injection)) {
         loadedInjection = await this.loadService(
-          injection.serviceInstanceName as keyof TServices
+          injection.serviceInstanceName as keyof (TServices & TInstances)
         );
       } else if (this.isCustomInjection(injection)) {
         loadedInjection = injection.customInjection;
@@ -206,19 +155,19 @@ export default class ServiceManager<TServices extends ServiceMap> {
   }
 
   private isServiceInstanceInjection(
-    injection: ServiceInjection<TServices>
-  ): injection is { serviceInstanceName: Extract<keyof TServices, string> } {
+    injection: ServiceInjection<TInstances>
+  ): injection is { serviceInstanceName: Extract<keyof TInstances, string> } {
     return 'serviceInstanceName' in injection;
   }
 
   private isCustomInjection(
-    injection: ServiceInjection<TServices>
+    injection: ServiceInjection<TInstances>
   ): injection is { customInjection: unknown } {
     return 'customInjection' in injection;
   }
 
   private async postBuildActions(
-    serviceDefinition: AdaptedServiceDefinition<TServices>,
+    serviceDefinition: AdaptedServiceDefinition<TServices, TInstances>,
     instance: Record<string, unknown>
   ) {
     if (!serviceDefinition.postBuildAsyncActions) return;
@@ -229,7 +178,7 @@ export default class ServiceManager<TServices extends ServiceMap> {
         continue;
       }
       throw new InvalidPostBuildActionError(
-        `Post build action "${methodName}" failed to execute in ${serviceDefinition.serviceClassName}.`
+        `Post build action "${methodName}" failed to execute in ${String(serviceDefinition.serviceClassName)}.`
       );
     }
   }

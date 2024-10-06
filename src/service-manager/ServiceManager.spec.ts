@@ -97,6 +97,9 @@ type Services = {
   MyDependencyBetaClass: MyDependencyBetaClass;
   InvalidService: never;
   InvalidInjection: never;
+};
+
+type Instances = {
   myService: MyServiceClassInjection;
   myOtherService: MyServiceClassInjection;
 };
@@ -110,7 +113,7 @@ const serviceDefinitionMocks = {
     serviceInstanceName: 'myService',
     serviceClassName: 'MyServiceClassSimple',
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withServiceInjections: {
     serviceClassName: 'MyServiceClassInjection',
     serviceInjections: [
@@ -136,7 +139,7 @@ const serviceDefinitionMocks = {
     ],
     postBuildAsyncActions: ['postBuildMethod'],
     pathToService: injectedServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withServiceDifferentInstanceName: {
     serviceInstanceName: 'myOtherService',
     serviceClassName: 'MyServiceClassInjection',
@@ -189,7 +192,7 @@ describe('ServiceManager', () => {
   describe('initialize', () => {
     it('initializes with definitions', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.onlyRequiredProperties,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
@@ -207,7 +210,7 @@ describe('ServiceManager', () => {
 
     it('populates the services object', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.onlyRequiredProperties,
           serviceDefinitionMocks.withServiceInstanceName,
@@ -285,7 +288,7 @@ describe('ServiceManager', () => {
 
     it('successfully loads a service with different instance name', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.withAllProperties,
           serviceDefinitionMocks.withServiceDifferentInstanceName,
@@ -295,7 +298,9 @@ describe('ServiceManager', () => {
       });
       // Act.
       const myService = await serviceManager.loadService('myService');
-      const myOtherService = await serviceManager.loadService('myOtherService');
+      const myOtherService = await serviceManager.loadService(
+        serviceManager.SERVICES.myOtherService
+      );
       // Assert.
       expect(myService).toBeInstanceOf(MyServiceClassInjection);
       expect(myOtherService).toBeInstanceOf(MyServiceClassInjection);
@@ -440,7 +445,7 @@ describe('ServiceManager', () => {
   describe('loadServices', () => {
     it('successfully loads multiple services', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.withServiceInstanceName,
           serviceDefinitionMocks.withServiceInjections,
