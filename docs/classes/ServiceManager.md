@@ -1,234 +1,236 @@
-[**service-manager**](../README.md) • **Docs**
+[**@lucastraba/service-manager**](../README.md) • **Docs**
 
 ---
 
-[service-manager](../README.md) / ServiceManager
+[@lucastraba/service-manager](../globals.md) / ServiceManager
 
-# Class: ServiceManager
+# Class: ServiceManager\<TServices, TInstances\>
 
 The ServiceManager is an IoC container.
 It is responsible for loading services and their dependencies.
 
 ## Example
 
-1. We write the classes we will use.
+1. Define the classes to be used as services.
 
 ```ts
 class MyClass {
   constructor(private readonly myDependency: MyDependency) {}
 }
 class MyDependency {}
+
+class MySecondDependency extends MyDependency {}
 ```
 
-2. If available, we add it to the declaration file, so that [ServiceManager.SERVICES](ServiceManager.md#services) can auto-complete.
+2. Create a map type of your services. This allows the ServiceManager to infer
+   the return type of the service when loading, to autocomplete the available services,
+   to allow you to use the `.SERVICES` property of the ServiceManager's instance
+   for even more runtime safety, and to have type safety for service definitions.
 
 ```ts
-// service-manager.d.ts
-declare module '@helu/core' {
-  interface ServiceManager {
-    MyClass: 'MyClass';
-    MyDependency: 'MyDependency';
-  }
-}
+type Services = {
+  MyService: MyService;
+  MyDependency: MyDependency;
+  MySecondDependency: MySecondDependency;
+};
 ```
 
-3. We create a definitions file. If the project has set an auto-importing mechanism,
-   make sure that the file is named '\*.definition.ts' or whatever naming convention you
-   have defined for the auto-importing.
-   Here, we define a group of [ServiceDefinition](../type-aliases/ServiceDefinition.md) objects.
+Additionally, you can define a type for your instances, if you have multiple instances of the same service.
+This is only required if you have multiple instances of the same service with different injections.
+Remember that the injections must have the same interface.
+If you define a type for your instances, you have to pass it as the second generic to the ServiceManager,
+and to the definitions type if you want the type safety.
+
+```ts
+type Instances = {
+  myServiceInstance: MyClass;
+  myDependencyInstance: MyDependency;
+};
+```
+
+3. Create a definitions file.
+   In this example, we're passing both generics.
 
 ```ts
 // myDomain.definition.ts
-const definitions: ServiceDefinition[] = [
+const definitions: ServiceDefinition<Services, Instances>[] = [
   {
-    serviceClassName: ServiceManager.SERVICES.MyClass,
+    serviceClassName: 'MyClass', // This will be autocompleted if you pass the first generic.
     serviceInjections: [
-      {
-        serviceInstanceName: ServiceManager.SERVICES.MyDependency,
-      },
+      { serviceInstanceName: 'MyDependency' }, // This will be autocompleted smartly if you pass one or both generics.
     ],
-    pathToService: async () => import('./MyClass'),
+    pathToService: async () => import('./MyClass'), // This is used to load the service asynchronously.
   },
   {
-    serviceClassName: ServiceManager.SERVICES.MyDependency,
+    serviceClassName: 'MyClass', // Note that we're reusing the class name, but with different instance name.
+    serviceInstanceName: 'myServiceOtherInstance', // This will be autocompleted if you pass the second generic.
+    serviceInjections: [{ serviceInstanceName: 'MySecondDependency' }],
+    pathToService: async () => import('./MySecondDependency'),
+  },
+  {
+    serviceClassName: 'MyDependency',
     pathToService: async () => import('./MyDependency'),
+  },
+  {
+    serviceClassName: 'MySecondDependency',
+    pathToService: async () => import('./MySecondDependency'),
   },
 ];
 
 export default definitions;
 ```
 
-4. We use it with [ServiceManager.loadService](ServiceManager.md#loadservice)
+Note the following:
+
+- The service instance name is optional. If not provided, the service class name will be used.
+- The service instance name must be unique.
+- The service class name must be unique.
+- The path to the service must be a function that returns a promise.
+- The path to the service must be a relative path.
+- The path to the service must be a valid path.
+
+What we're doing here is that we're creating a list of instructions for the ServiceManager.
+
+These definitions will produce:
+
+- A MyClass instance with a MyDependency instance injected.
+- A MyClass instance with a MySecondDependency instance injected.
+- A MyDependency instance.
+- A MySecondDependency instance.
+
+All these instances are singletons and will be reused by the ServiceManager
+every time you call [ServiceManager.loadService](ServiceManager.md#loadservice) or [ServiceManager.loadServices](ServiceManager.md#loadservices)
+on your ServiceManager instance, and the service names will be available
+in the [ServiceManager.SERVICES](ServiceManager.md#services) of the instance,
+in case you don't want to rely on string literals.
+
+Additionally, if you define each class in a separate file,
+the ServiceManager will be able to load them asynchronously on demand.
+This is why the [ServiceManager.loadService](ServiceManager.md#loadservice) must be awaited.
+
+4. Use with [ServiceManager.loadService](ServiceManager.md#loadservice)
 
 ```ts
 // myFunctionality.ts
-const myCoolService = ServiceManager.loadService(
-  ServiceManager.SERVICES.MyClass
-) as MyClass;
+const myCoolService = await serviceManager.loadService('MyClass');
 ```
+
+or
+
+```ts
+// myFunctionality.ts
+const myCoolService = await serviceManager.loadServices([
+  'MyClass',
+  'myServiceOtherInstance',
+]);
+```
+
+or
+
+```ts
+// myFunctionality.ts
+const myCoolService = await serviceManager.loadService(
+  serviceManager.SERVICES.MyClass
+);
+```
+
+All of this is type safe, and the return type of the service will be correctly inferred.
+Please note that if you load multiple services, you will have to check whether
+the services in the array are undefined, or cast them manually.
+
+## Type Parameters
+
+• **TServices** _extends_ `ServiceMap`
+
+• **TInstances** _extends_ `Record`\<`string`, `unknown`\> = `TServices`
 
 ## Constructors
 
 ### new ServiceManager()
 
-> **new ServiceManager**(): [`ServiceManager`](ServiceManager.md)
+> **new ServiceManager**\<`TServices`, `TInstances`\>(`config`): [`ServiceManager`](ServiceManager.md)\<`TServices`, `TInstances`\>
+
+Constructs a new ServiceManager.
+
+#### Parameters
+
+• **config**: [`ServiceManagerConfig`](../type-aliases/ServiceManagerConfig.md)\<`TServices`, `TInstances`\>
+
+The configuration object containing service definitions.
 
 #### Returns
 
-[`ServiceManager`](ServiceManager.md)
+[`ServiceManager`](ServiceManager.md)\<`TServices`, `TInstances`\>
+
+#### Defined in
+
+[src/service-manager/ServiceManager.ts:153](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/ServiceManager.ts#L153)
 
 ## Properties
 
 ### SERVICES
 
-> `static` **SERVICES**: `Record`\<`string`, `string`\> = `{}`
+> **SERVICES**: \{ \[K in string \| number \| symbol\]: K \}
 
-A services map, where both the key and the value is the service instance name
-(or the service class name, if the instance name is not defined).
-
-This can be extended by the user creating a declaration file with the following content:
-
-```ts
-declare module '@helu/core' {
-  interface ServiceManager {
-    MyService: 'MyService';
-  }
-}
-```
+A map of service names, where both the key and the value are the service instance name
+or the service class name if the instance name is not defined.
 
 #### Defined in
 
-src/serviceManager/ServiceManager.ts:85
+[src/service-manager/ServiceManager.ts:139](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/ServiceManager.ts#L139)
 
 ## Methods
 
-### initialize()
-
-> `static` **initialize**(`config`): `Promise`\<`void`\>
-
-Initialize the service manager.
-
-#### Parameters
-
-• **config**: [`ServiceManagerConfig`](../type-aliases/ServiceManagerConfig.md)
-
-The configuration object.
-
-#### Returns
-
-`Promise`\<`void`\>
-
-A promise that resolves when the service manager is initialized.
-
-See [ServiceManagerConfig](../type-aliases/ServiceManagerConfig.md) for initialization examples.
-
-#### Defined in
-
-src/serviceManager/ServiceManager.ts:99
-
----
-
 ### loadService()
 
-> `static` **loadService**(`serviceInstanceName`): `Promise`\<`unknown`\>
+> **loadService**\<`K`\>(`serviceInstanceName`): `Promise`\<`TServices` & `TInstances`\[`K`\]\>
 
-Load a service.
-This will load the service and all its dependencies, recursively.
-If the service is already loaded, it will return the existing instance.
-If the service is not found, it will throw an error.
-If the service has a post build action, it will execute it.
+Loads a service by its instance name.
+
+#### Type Parameters
+
+• **K** _extends_ `string` \| `number` \| `symbol`
 
 #### Parameters
 
-• **serviceInstanceName**: `string`
+• **serviceInstanceName**: `K`
 
-The instance name of the service to load.
+The name of the service instance to load.
 
 #### Returns
 
-`Promise`\<`unknown`\>
+`Promise`\<`TServices` & `TInstances`\[`K`\]\>
 
 A promise that resolves with the service instance.
 
-#### Throws
-
-`DefinitionNotFoundError` if ServiceDefinition.serviceClassName or ServiceDefinition.serviceInstanceName are not found.
-
-#### Throws
-
-`InvalidInjectionError` if ServiceDefinition.serviceInjections does not have the required keys. This case cannot be reached using Typescript.
-
-#### Throws
-
-`InvalidPostBuildActionError` if one or more of the methods specified in ServiceDefinition.pathToService is not valid.
-
-#### Throws
-
-`InvalidPathError` if ServiceDefinition.pathToService is invalid.
-
-#### Throws
-
-`PathNotFoundError` if ServiceDefinition.pathToService can't be found.
-
-#### Example
-
-```ts
-(await ServiceManager.loadService('myService')) as MyService;
-```
-
 #### Defined in
 
-src/serviceManager/ServiceManager.ts:137
+[src/service-manager/ServiceManager.ts:166](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/ServiceManager.ts#L166)
 
 ---
 
 ### loadServices()
 
-> `static` **loadServices**(`serviceInstanceNames`): `Promise`\<`unknown`[]\>
+> **loadServices**\<`K`\>(`serviceInstanceNames`): `Promise`\<`TServices` & `TInstances`\[`K`\][]\>
 
-Load multiple services in parallel.
-This will load the services and all their dependencies, recursively.
-The order of the services in the returned array will match the order of the instance names in the input array.
-Internally, this uses [ServiceManager.loadService](ServiceManager.md#loadservice). See its documentation for more details.
+Loads multiple services in parallel.
+
+#### Type Parameters
+
+• **K** _extends_ `string` \| `number` \| `symbol`
 
 #### Parameters
 
-• **serviceInstanceNames**: `string`[] = `[]`
+• **serviceInstanceNames**: `K`[] = `[]`
 
-An array with the instance names of the services to load.
-
-#### Returns
-
-`Promise`\<`unknown`[]\>
-
-A promise that resolves with an array of the service instances.
-
-#### Example
-
-```ts
-const [myService, myOtherService] = (await ServiceManager.loadServices([
-  'myService',
-  'myOtherService',
-])) as [MyService, MyOtherService];
-```
-
-#### Defined in
-
-src/serviceManager/ServiceManager.ts:158
-
----
-
-### reset()
-
-> `static` **reset**(): `void`
-
-Reset the service manager.
-This is useful for testing purposes, or if you want to re-initialize the service manager.
+An array of service instance names to load.
 
 #### Returns
 
-`void`
+`Promise`\<`TServices` & `TInstances`\[`K`\][]\>
+
+A promise that resolves with an array of service instances.
 
 #### Defined in
 
-src/serviceManager/ServiceManager.ts:111
+[src/service-manager/ServiceManager.ts:180](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/ServiceManager.ts#L180)

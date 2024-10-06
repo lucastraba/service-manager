@@ -1,41 +1,29 @@
-[**service-manager**](../README.md) • **Docs**
+[**@lucastraba/service-manager**](../README.md) • **Docs**
 
 ---
 
-[service-manager](../README.md) / ServiceManagerConfig
+[@lucastraba/service-manager](../globals.md) / ServiceManagerConfig
 
-# Type Alias: ServiceManagerConfig
+# Type Alias: ServiceManagerConfig\<TServices, TInstances\>
 
-> **ServiceManagerConfig**: `object`
+> **ServiceManagerConfig**\<`TServices`, `TInstances`\>: `object`
 
 Configuration object for the initialization of the ServiceManager.
+
+## Type Parameters
+
+• **TServices** _extends_ `ServiceMap`
+
+• **TInstances** _extends_ `ServiceMap` = `TServices`
 
 ## Type declaration
 
 ### serviceDefinitions
 
-> **serviceDefinitions**: [`ServiceDefinition`](ServiceDefinition.md)[]
+> **serviceDefinitions**: [`ServiceDefinition`](ServiceDefinition.md)\<`TServices`, `TInstances`\>[]
 
 The service definitions that will be available for the loading of the services.
 
-#### Remarks
-
-If you want to load the services automatically, you can use `import.glob.meta`.
-Use the following snippet (asterisks have been escaped with [] due to limitations of Typedoc):
-
-```ts
-const serviceDefinitions = [];
-const definitionFiles = import.meta.glob<{ default: ServiceDefinition[] }>(
-  `src/[**]/[*].definitions.ts`
-);
-for (const path in definitionFiles) {
-  const { default: definition } = await definitionFiles[path]();
-  serviceDefinitions.push(...definition);
-}
-```
-
-This will collect all the definitions from the `src` folder and its sub-folders.
-
 ## Defined in
 
-src/serviceManager/services.type.ts:4
+[src/service-manager/services.type.ts:4](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/services.type.ts#L4)
