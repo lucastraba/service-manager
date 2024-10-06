@@ -3,7 +3,7 @@
  */
 export type ServiceManagerConfig<
   TServices extends ServiceMap,
-  TInstances extends Record<string, unknown> = Record<string, unknown>,
+  TInstances extends ServiceMap = TServices,
 > = {
   serviceDefinitions: ServiceDefinition<TServices, TInstances>[];
 };
@@ -14,11 +14,11 @@ export type ServiceManagerConfig<
  */
 export type ServiceDefinition<
   TServices extends ServiceMap,
-  TInstances extends Record<string, unknown> = Record<string, unknown>,
+  TInstances extends ServiceMap = TServices,
 > = {
   serviceClassName: keyof TServices;
   serviceInstanceName?: keyof TInstances;
-  serviceInjections?: ServiceInjection<TInstances>[];
+  serviceInjections?: ServiceInjection<TServices, TInstances>[];
   postBuildAsyncActions?: string[];
   pathToService: () => Promise<
     ModuleWithDefaultExport<TServices[keyof TServices]>
@@ -29,8 +29,11 @@ export type ServiceDefinition<
  * Defines a service injection. A service injection can be either a service instance name or a custom injection.
  */
 export type ServiceInjection<
-  TInstances extends Record<string, unknown> = Record<string, unknown>,
-> = { serviceInstanceName: keyof TInstances } | { customInjection: unknown };
+  TServices extends ServiceMap,
+  TInstances extends ServiceMap = TServices,
+> =
+  | { serviceInstanceName: keyof TServices | keyof TInstances }
+  | { customInjection: unknown };
 
 export type LoadedService = {
   [index: string]: unknown;
@@ -38,9 +41,9 @@ export type LoadedService = {
 
 export type AdaptedServiceDefinition<
   TServices extends ServiceMap,
-  TInstances extends Record<string, unknown> = Record<string, unknown>,
+  TInstances extends ServiceMap = TServices,
 > = ServiceDefinition<TServices, TInstances> & {
-  serviceInstanceName: keyof TServices;
+  serviceInstanceName: keyof TServices | keyof TInstances;
 };
 
 export type ServiceMap = Record<string, unknown>;

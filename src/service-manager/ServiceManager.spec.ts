@@ -108,7 +108,7 @@ const serviceDefinitionMocks = {
   onlyRequiredProperties: {
     serviceClassName: 'MyServiceClassSimple',
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withServiceInstanceName: {
     serviceInstanceName: 'myService',
     serviceClassName: 'MyServiceClassSimple',
@@ -121,7 +121,7 @@ const serviceDefinitionMocks = {
       { customInjection: injectionValueAlpha },
     ],
     pathToService: injectedServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withInvertedServiceInjections: {
     serviceClassName: 'MyServiceClassInjectionInvertedArgs',
     serviceInjections: [
@@ -129,7 +129,7 @@ const serviceDefinitionMocks = {
       { serviceInstanceName: 'MyDependencyAlphaClass' },
     ],
     pathToService: invertedInjectionServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withAllProperties: {
     serviceInstanceName: 'myService',
     serviceClassName: 'MyServiceClassInjection',
@@ -148,12 +148,12 @@ const serviceDefinitionMocks = {
       { customInjection: injectionValueBeta },
     ],
     pathToService: injectedServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withPostBuildAction: {
     serviceClassName: 'MyServiceClassSimple',
     postBuildAsyncActions: ['postBuildMethod'],
     pathToService: simpleServicePathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   withInvalidPostBuildAction: {
     serviceClassName: 'MyServiceClassSimple',
     postBuildAsyncActions: ['nonExistentMethod'],
@@ -173,15 +173,15 @@ const serviceDefinitionMocks = {
     serviceClassName: 'MyServiceClassSimple',
     postBuildAsyncActions: ['nonExistentMethod'],
     pathToService: vi.fn().mockRejectedValue('error'),
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   dependencyDefinitionAlpha: {
     serviceClassName: 'MyDependencyAlphaClass',
     pathToService: dependencyAlphaPathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
   dependencyDefinitionBeta: {
     serviceClassName: 'MyDependencyBetaClass',
     pathToService: dependencyBetaPathMock,
-  } as ServiceDefinition<Services>,
+  } as ServiceDefinition<Services, Instances>,
 };
 
 describe('ServiceManager', () => {
@@ -228,7 +228,7 @@ describe('ServiceManager', () => {
   describe('loadService', () => {
     it('successfully loads a simple service', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [serviceDefinitionMocks.onlyRequiredProperties],
       });
       // Act.
@@ -240,7 +240,7 @@ describe('ServiceManager', () => {
     });
     it('successfully loads a service using the SERVICES object in the serviceManager', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [serviceDefinitionMocks.onlyRequiredProperties],
       });
       // Act.
@@ -252,7 +252,7 @@ describe('ServiceManager', () => {
     });
     it('successfully loads a service with injections', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.withServiceInjections,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
@@ -270,7 +270,7 @@ describe('ServiceManager', () => {
 
     it('successfully loads a service with inverted injections', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.withInvertedServiceInjections,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
@@ -314,7 +314,7 @@ describe('ServiceManager', () => {
 
     it('successfully loads a service with post build action', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [serviceDefinitionMocks.withPostBuildAction],
       });
       // Act.
@@ -328,7 +328,7 @@ describe('ServiceManager', () => {
 
     it('instantiates a service only once', async () => {
       // Arrange.
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [
           serviceDefinitionMocks.withServiceInjections,
           serviceDefinitionMocks.dependencyDefinitionAlpha,
@@ -424,7 +424,7 @@ describe('ServiceManager', () => {
     it('throws an error if the pathToService cannot be resolved', async () => {
       // Arrange.
       let error: Maybe<InvalidPathError>;
-      const serviceManager = new ServiceManager<Services>({
+      const serviceManager = new ServiceManager<Services, Instances>({
         serviceDefinitions: [serviceDefinitionMocks.withInvalidPath],
       });
       // Act

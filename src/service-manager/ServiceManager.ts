@@ -19,7 +19,7 @@ import type {
  */
 export default class ServiceManager<
   TServices extends ServiceMap,
-  TInstances extends Record<string, unknown> = Record<string, unknown>,
+  TInstances extends Record<string, unknown> = TServices,
 > {
   public SERVICES: {
     [K in keyof (TServices & TInstances)]: K;
@@ -115,7 +115,7 @@ export default class ServiceManager<
     let injections: unknown[] = [];
     if (serviceDefinition.serviceInjections) {
       injections = await this.parseInjections(
-        serviceDefinition.serviceInjections
+        serviceDefinition.serviceInjections as ServiceInjection<TInstances>[]
       );
     }
     const DefinitionConstructor = this.dependencyResolver.getLoadedModule(
