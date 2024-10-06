@@ -2,35 +2,38 @@ import { InvalidPathError, PathNotFoundError } from './serviceManager.error';
 import type {
   AdaptedServiceDefinition,
   ServiceDefinition,
+  ServiceMap,
 } from './services.type';
 
 /**
  * @internal
  */
-export default class DependencyResolver {
-  public static serviceDefinitions: ServiceDefinition[] = [];
+export default class DependencyResolver<
+  TServices extends ServiceMap,
+  TInstances extends Record<string, unknown> = Record<string, unknown>,
+> {
+  public serviceDefinitions: ServiceDefinition<TServices, TInstances>[] = [];
 
   private loadedServiceModules: Record<string, Constructible> = {};
   private serviceModulePromises: Record<string, Promise<Constructible>> = {};
 
   public async resolve(
-    serviceDefinition: AdaptedServiceDefinition
+    serviceDefinition: AdaptedServiceDefinition<TServices, TInstances>
   ): Promise<void> {
     const unloadedModuleNames =
       this.getUnloadedInjectionNames(serviceDefinition);
-    unloadedModuleNames.push(serviceDefinition.serviceInstanceName);
+    unloadedModuleNames.push(serviceDefinition.serviceInstanceName as string);
     await this.loadDependencies(unloadedModuleNames);
   }
 
   public getServiceDefinition(
     serviceInstanceName: string
-  ): Nullable<ServiceDefinition> {
+  ): Nullable<ServiceDefinition<TServices, TInstances>> {
     return (
-      DependencyResolver.serviceDefinitions.find(
-        (element: ServiceDefinition) =>
-          element.serviceInstanceName
-            ? element.serviceInstanceName === serviceInstanceName
-            : element.serviceClassName === serviceInstanceName
+      this.serviceDefinitions.find((element) =>
+        element.serviceInstanceName
+          ? element.serviceInstanceName === serviceInstanceName
+          : element.serviceClassName === serviceInstanceName
       ) ?? null
     );
   }
@@ -48,13 +51,14 @@ export default class DependencyResolver {
   }
 
   private getUnloadedInjectionNames(
-    serviceDefinition: Nullable<ServiceDefinition>
+    serviceDefinition: Nullable<ServiceDefinition<TServices, TInstances>>
   ): string[] {
     const unloadedInjectionNames: string[] = [];
     if (!serviceDefinition?.serviceInjections) return unloadedInjectionNames;
     for (const serviceInjection of serviceDefinition.serviceInjections) {
       if (!('serviceInstanceName' in serviceInjection)) continue;
-      const injectionInstanceName = serviceInjection.serviceInstanceName;
+      const injectionInstanceName =
+        serviceInjection.serviceInstanceName as string;
       if (this.isModuleLoaded(injectionInstanceName)) continue;
       const childServiceDefinition = this.getServiceDefinition(
         injectionInstanceName
@@ -102,8 +106,8 @@ export default class DependencyResolver {
   }
 
   private importServiceFromPath(
-    serviceDefinition: Nullable<ServiceDefinition>
-  ): Nullable<Promise<ModuleWithDefaultExport>> {
+    serviceDefinition: Nullable<ServiceDefinition<TServices, TInstances>>
+  ): Nullable<Promise<ModuleWithDefaultExport<TServices[keyof TServices]>>> {
     if (!serviceDefinition || !serviceDefinition.pathToService) {
       return null;
     }
