@@ -1,8 +1,8 @@
-[**service-manager**](../../README.md) • **Docs**
+[**@lucastraba/service-manager**](../../README.md) • **Docs**
 
 ---
 
-[service-manager](../../README.md) / [\<internal\>](../README.md) / ModuleWithDefaultExport
+[@lucastraba/service-manager](../../globals.md) / [\<internal\>](../README.md) / ModuleWithDefaultExport
 
 # Type Alias: ModuleWithDefaultExport\<T\>
 
@@ -20,4 +20,4 @@
 
 ## Defined in
 
-shared-kernel.d.ts:5
+[shared-kernel.d.ts:5](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/shared-kernel.d.ts#L5)

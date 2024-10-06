@@ -1,57 +1,58 @@
-[**service-manager**](../README.md) • **Docs**
+[**@lucastraba/service-manager**](../README.md) • **Docs**
 
 ---
 
-[service-manager](../README.md) / ServiceDefinition
+[@lucastraba/service-manager](../globals.md) / ServiceDefinition
 
-# Type Alias: ServiceDefinition
+# Type Alias: ServiceDefinition\<TServices, TInstances\>
 
-> **ServiceDefinition**: `object`
+> **ServiceDefinition**\<`TServices`, `TInstances`\>: `object`
 
 Defines a service. A service has a class name, optionally an instance name, optionally a list of service injections,
-optionally a list of post-build asynchronous actions, and a path to the service.
+optionally a list of post-build asynchronous actions, and a path to the service, so that the service can be loaded asynchronously.
+
+## Type Parameters
+
+• **TServices** _extends_ `ServiceMap`
+
+• **TInstances** _extends_ `ServiceMap` = `TServices`
 
 ## Type declaration
 
 ### pathToService()
 
-> **pathToService**: () => `Promise`\<[`ModuleWithDefaultExport`](../-internal-/type-aliases/ModuleWithDefaultExport.md)\>
+> **pathToService**: () => `Promise`\<[`ModuleWithDefaultExport`](../-internal-/type-aliases/ModuleWithDefaultExport.md)\<`TServices`\[keyof `TServices`\]\>\>
 
-A function that returns a promise resolving to the service
+A function that returns a promise resolving to the service.
 
 #### Returns
 
-`Promise`\<[`ModuleWithDefaultExport`](../-internal-/type-aliases/ModuleWithDefaultExport.md)\>
+`Promise`\<[`ModuleWithDefaultExport`](../-internal-/type-aliases/ModuleWithDefaultExport.md)\<`TServices`\[keyof `TServices`\]\>\>
 
 ### postBuildAsyncActions?
 
 > `optional` **postBuildAsyncActions**: `string`[]
 
 An array of post-build asynchronous actions. Optional.
-Use this option if you want to perform some asynchronous actions after the service has been built.
-If the actions are not asynchronous, it is recommended that you perform them in the constructor
-of your service instead.
 
 ### serviceClassName
 
-> **serviceClassName**: `string`
+> **serviceClassName**: keyof `TServices`
 
-The class name of the service. This must match exactly with the name of your service's class.
+The class name of the service.
 
 ### serviceInjections?
 
-> `optional` **serviceInjections**: [`ServiceInjection`](ServiceInjection.md)[]
+> `optional` **serviceInjections**: [`ServiceInjection`](../-internal-/type-aliases/ServiceInjection.md)\<`TServices`, `TInstances`\>[]
 
 An array of service injections. Optional.
 
 ### serviceInstanceName?
 
-> `optional` **serviceInstanceName**: `string`
+> `optional` **serviceInstanceName**: keyof `TInstances`
 
 The instance name of the service. If not provided, the `serviceClassName` will be used.
-This option is useful if you want to have multiple instances of the same service but with different
-injections. The only requirement is that the injections share the same interface.
 
 ## Defined in
 
-src/serviceManager/services.type.ts:26
+[src/service-manager/services.type.ts:16](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/services.type.ts#L16)
