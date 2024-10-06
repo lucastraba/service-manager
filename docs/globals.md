@@ -1,4 +1,4 @@
-# @lucastraba/service-manager
+# Service Manager
 
 [**@lucastraba/service-manager**](README.md) • **Docs**
 

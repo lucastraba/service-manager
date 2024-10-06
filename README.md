@@ -144,10 +144,15 @@ making it easier to write modular, testable, and maintainable code.
    main();
    ```
 
-## More Information
+## Additional Information and Examples
 
-For more information, more examples and the API reference,
-check out the [TSDocs](./docs/) section.
+For additional information and examples,
+please refer to the ServiceManager class [TSDocs](./docs/classes/ServiceManager.md) section.
+
+## API Reference
+
+For more information about the API, you can check
+the [TSDocs](./docs/globals.md) section.
 
 ## Contributing
 
