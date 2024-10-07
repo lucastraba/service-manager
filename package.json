@@ -1,12 +1,19 @@
 {
   "name": "@lucastraba/service-manager",
-  "private": "true",
+  "version": "1.0.0",
+  "description": "A simple IoC container for TypeScript",
+  "license": "MIT",
+  "author": {
+    "name": "Lucas Traba",
+    "email": "lucastraba@gmail.com"
+  },
   "type": "module",
-  "main": "./dist/src/main.js",
-  "module": "./dist/src/main.js",
-  "types": "./dist/src/main.d.ts",
+  "main": "./dist/service-manager.umd.js",
+  "module": "./dist/service-manager.es.js",
+  "types": "./dist/main.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "vite build",
@@ -50,7 +57,7 @@
     "prettier": "^3.3.3",
     "prettier-plugin-packagejson": "^2.5.2",
     "prettier-plugin-sort-json": "^4.0.0",
-    "typedoc": "^0.26.7",
+    "typedoc": "^0.26.8",
     "typedoc-plugin-markdown": "^4.2.9",
     "typedoc-plugin-missing-exports": "^3.0.0",
     "typescript": "^5.6.2",
