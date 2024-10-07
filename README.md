@@ -1,6 +1,6 @@
 # Service Manager
 
-The Service Manager is an IoC (Inversion of Control) container for TypeScript.
+The Service Manager is a simple schema-based IoC (Inversion of Control) container for TypeScript.
 It provides a way to manage dependencies and services in your application,
 making it easier to write modular, testable, and maintainable code.
 
@@ -8,7 +8,7 @@ making it easier to write modular, testable, and maintainable code.
 
 - **Dependency Injection Made Easy**: The Service Manager automatically resolves
   and injects dependencies based on simple service definition schemas
-- **Instance Management**: Swap injections and arguments easily 
+- **Instance Management**: Swap injections and arguments easily
   by defining them in the service definition schema
 - **Singletons galore**: All your services will be singletons,
   no need to worry about misplacing your state
