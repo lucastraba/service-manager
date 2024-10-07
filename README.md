@@ -6,19 +6,20 @@ making it easier to write modular, testable, and maintainable code.
 
 ## Features
 
-- **Dependency Injection**: The Service Manager automatically resolves
-  and injects dependencies for your services based on the provided service definitions.
-- **Lazy Loading**: Services are loaded asynchronously on-demand,
-  improving application startup time and resource usage.
-- **Type Safety**: The Service Manager leverages TypeScript's type system
-  to provide type safety for service definitions, injections, and usage.
-- **Instance Management**: You can define multiple instances of the same service
-  with different injections, allowing for flexibility and reusability.
-- **Post-build Actions**: The Service Manager supports post-build asynchronous
-  actions, enabling you to perform additional setup or initialization tasks
-  after a service is instantiated.
-- **Testing Support**: The modular design and dependency injection make it
-  easier to write unit tests for your services.
+- **Dependency Injection Made Easy**: The Service Manager automatically resolves
+  and injects dependencies based on simple service definition schemas
+- **Instance Management**: Swap injections and arguments easily 
+  by defining them in the service definition schema
+- **Singletons galore**: All your services will be singletons,
+  no need to worry about misplacing your state
+- **Post-build Actions**: Define your initialization actions directly
+  in the schema
+- **Lazy Loading**: Service modules are imported asynchronously on-demand
+- **Type Safety**: The Service Manager has been meticulously developed
+  to ensure maximum type safety and autocompletion
+- **Lightweight:** Did you know the Service Manager weighs only 7 kB gzipped? It's true!
+- **Zero Dependencies:** The Service Manager has no dependencies,
+  so you can expect it to work even if all other libraries collapse
 
 ## Getting Started
 
