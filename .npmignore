@@ -1,0 +1,11 @@
+src
+tsconfig.json
+tsconfig.node.json
+typedoc.config.cjs
+vite.config.ts
+vitest.config.ts
+prettier.config.cjs
+.eslintcache
+.eslintrc.cjs
+.prettierignore
+.gitignore
