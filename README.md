@@ -118,7 +118,7 @@ making it easier to write modular, testable, and maintainable code.
    import { ServiceManager } from 'service-manager';
    import serviceDefinitions from './serviceDefinitions';
 
-   const serviceManager = new ServiceManager({
+   const serviceManager = new ServiceManager<Services, Instances>({
      serviceDefinitions,
    });
    ```
