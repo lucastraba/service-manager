@@ -1,9 +1,15 @@
-import { InvalidPathError, PathNotFoundError } from './serviceManager.error';
+import type {
+  Constructible,
+  MaybeNullable,
+  ModuleWithDefaultExport,
+  Nullable,
+} from '../common.type';
 import type {
   AdaptedServiceDefinition,
   ServiceDefinition,
   ServiceMap,
-} from './services.type';
+} from './service-manager.type';
+import { InvalidPathError, PathNotFoundError } from './serviceManager.error';
 
 /**
  * @internal

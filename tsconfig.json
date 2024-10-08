@@ -14,15 +14,12 @@
     "noEmit": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
-    "paths": {
-      "*": ["src/*"]
-    },
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "strictNullChecks": true,
     "target": "esnext",
-    "types": ["vitest/globals", "./shared-kernel.d.ts"],
+    "types": ["vitest/globals"],
     "useDefineForClassFields": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],

@@ -1,3 +1,5 @@
+import { Maybe } from '../common.type';
+import { ServiceDefinition } from './service-manager.type';
 import ServiceManager from './ServiceManager';
 import {
   DefinitionNotFoundError,
@@ -6,7 +8,6 @@ import {
   InvalidPostBuildActionError,
   PathNotFoundError,
 } from './serviceManager.error';
-import { ServiceDefinition } from './services.type';
 
 vi.mock('./utils/serviceManager.utils.ts');
 

@@ -1,3 +1,4 @@
+import { ModuleWithDefaultExport } from '../common.type';
 /**
  * Configuration object for the initialization of the ServiceManager.
  */

@@ -3,7 +3,8 @@
     "allowSyntheticDefaultImports": true,
     "composite": true,
     "module": "ESNext",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "types": ["node"]
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "shared-kernel.d.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts"]
 }

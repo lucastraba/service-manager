@@ -1,9 +1,4 @@
 import DependencyResolver from './DependencyResolver';
-import {
-  DefinitionNotFoundError,
-  InvalidInjectionError,
-  InvalidPostBuildActionError,
-} from './serviceManager.error';
 import type {
   AdaptedServiceDefinition,
   LoadedService,
@@ -11,7 +6,12 @@ import type {
   ServiceInjection,
   ServiceManagerConfig,
   ServiceMap,
-} from './services.type';
+} from './service-manager.type';
+import {
+  DefinitionNotFoundError,
+  InvalidInjectionError,
+  InvalidPostBuildActionError,
+} from './serviceManager.error';
 
 /**
  * The ServiceManager is an IoC container.
