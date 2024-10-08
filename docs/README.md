@@ -1,24 +1,25 @@
 # Service Manager
 
-The Service Manager is an IoC (Inversion of Control) container for TypeScript.
+The Service Manager is a simple schema-based IoC (Inversion of Control) container for TypeScript.
 It provides a way to manage dependencies and services in your application,
 making it easier to write modular, testable, and maintainable code.
 
 ## Features
 
-- **Dependency Injection**: The Service Manager automatically resolves
-  and injects dependencies for your services based on the provided service definitions.
-- **Lazy Loading**: Services are loaded asynchronously on-demand,
-  improving application startup time and resource usage.
-- **Type Safety**: The Service Manager leverages TypeScript's type system
-  to provide type safety for service definitions, injections, and usage.
-- **Instance Management**: You can define multiple instances of the same service
-  with different injections, allowing for flexibility and reusability.
-- **Post-build Actions**: The Service Manager supports post-build asynchronous
-  actions, enabling you to perform additional setup or initialization tasks
-  after a service is instantiated.
-- **Testing Support**: The modular design and dependency injection make it
-  easier to write unit tests for your services.
+- **Dependency Injection Made Easy**: The Service Manager automatically resolves
+  and injects dependencies based on simple service definition schemas
+- **Instance Management**: Swap injections and arguments easily
+  by defining them in the service definition schema
+- **Singletons galore**: All your services will be singletons,
+  no need to worry about misplacing your state
+- **Post-build Actions**: Define your initialization actions directly
+  in the schema
+- **Lazy Loading**: Service modules are imported asynchronously on-demand
+- **Type Safety**: The Service Manager has been meticulously developed
+  to ensure maximum type safety and autocompletion
+- **Lightweight:** Did you know the Service Manager weighs only 7 kB gzipped? It's true!
+- **Zero Dependencies:** The Service Manager has no dependencies,
+  so you can expect it to work even if all other libraries collapse
 
 ## Getting Started
 
@@ -117,7 +118,7 @@ making it easier to write modular, testable, and maintainable code.
    import { ServiceManager } from 'service-manager';
    import serviceDefinitions from './serviceDefinitions';
 
-   const serviceManager = new ServiceManager({
+   const serviceManager = new ServiceManager<Services, Instances>({
      serviceDefinitions,
    });
    ```
@@ -147,12 +148,12 @@ making it easier to write modular, testable, and maintainable code.
 ## Additional Information and Examples
 
 For additional information and examples,
-please refer to the ServiceManager class [TSDocs](./classes/ServiceManager.md) section.
+please refer to the ServiceManager class [TSDocs](./docs/classes/ServiceManager.md) section.
 
 ## API Reference
 
 For more information about the API, you can check
-the [TSDocs](./globals.md) section.
+the [TSDocs](./docs/globals.md) section.
 
 ## Contributing
 
