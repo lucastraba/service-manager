@@ -6,8 +6,13 @@ export default defineConfig({
     lib: {
       entry: 'src/main.ts',
       name: 'ServiceManager',
-      fileName: (format) => `service-manager.${format}.js`,
+      fileName: () => `index.js`,
+      formats: ['es'],
     },
   },
-  plugins: [dts()],
+  plugins: [
+    dts({
+      exclude: ['**/*.spec.ts'],
+    }),
+  ],
 });

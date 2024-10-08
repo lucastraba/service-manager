@@ -8,8 +8,7 @@
     "email": "lucastraba@gmail.com"
   },
   "type": "module",
-  "main": "./dist/service-manager.umd.js",
-  "module": "./dist/service-manager.es.js",
+  "module": "./dist/index.js",
   "types": "./dist/main.d.ts",
   "files": [
     "dist",
@@ -39,8 +38,8 @@
   },
   "devDependencies": {
     "@types/eslint": "^9.6.1",
-    "@typescript-eslint/eslint-plugin": "^8.8.0",
-    "@typescript-eslint/parser": "^8.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
     "@vitest/runner": "^2.1.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
@@ -52,7 +51,6 @@
     "eslint-plugin-tsdoc": "^0.3.0",
     "eslint-plugin-vitest": "^0.5.4",
     "eslint-plugin-vitest-globals": "^1.5.0",
-    "eslint-plugin-vue": "^9.28.0",
     "husky": "^9.1.6",
     "prettier": "^3.3.3",
     "prettier-plugin-packagejson": "^2.5.2",
