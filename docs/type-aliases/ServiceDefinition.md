@@ -1,6 +1,6 @@
 [**@lucastraba/service-manager**](../README.md) • **Docs**
 
-***
+---
 
 [@lucastraba/service-manager](../globals.md) / ServiceDefinition
 
@@ -13,9 +13,9 @@ optionally a list of post-build asynchronous actions, and a path to the service,
 
 ## Type Parameters
 
-• **TServices** *extends* `ServiceMap`
+• **TServices** _extends_ `ServiceMap`
 
-• **TInstances** *extends* `ServiceMap` = `TServices`
+• **TInstances** _extends_ `ServiceMap` = `TServices`
 
 ## Type declaration
 

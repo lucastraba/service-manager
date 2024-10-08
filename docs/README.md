@@ -1,6 +1,6 @@
 **@lucastraba/service-manager** • [**Docs**](globals.md)
 
-***
+---
 
 # Service Manager
 

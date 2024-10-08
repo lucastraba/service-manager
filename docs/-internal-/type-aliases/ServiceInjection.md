@@ -1,6 +1,6 @@
 [**@lucastraba/service-manager**](../../README.md) • **Docs**
 
-***
+---
 
 [@lucastraba/service-manager](../../globals.md) / [\<internal\>](../README.md) / ServiceInjection
 
@@ -12,9 +12,9 @@ Defines a service injection. A service injection can be either a service instanc
 
 ## Type Parameters
 
-• **TServices** *extends* `ServiceMap`
+• **TServices** _extends_ `ServiceMap`
 
-• **TInstances** *extends* `ServiceMap` = `TServices`
+• **TInstances** _extends_ `ServiceMap` = `TServices`
 
 ## Defined in
 

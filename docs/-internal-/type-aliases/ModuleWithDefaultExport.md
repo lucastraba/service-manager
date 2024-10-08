@@ -1,6 +1,6 @@
 [**@lucastraba/service-manager**](../../README.md) • **Docs**
 
-***
+---
 
 [@lucastraba/service-manager](../../globals.md) / [\<internal\>](../README.md) / ModuleWithDefaultExport
 
