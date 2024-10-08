@@ -17,7 +17,7 @@ making it easier to write modular, testable, and maintainable code.
 - **Lazy Loading**: Service modules are imported asynchronously on-demand
 - **Type Safety**: The Service Manager has been meticulously developed
   to ensure maximum type safety and autocompletion
-- **Lightweight:** Did you know the Service Manager weighs only 7 kB gzipped? It's true!
+- **Lightweight:** Did you know the Service Manager weighs only 6 kB gzipped? It's true!
 - **Zero Dependencies:** The Service Manager has no dependencies,
   so you can expect it to work even if all other libraries collapse
 

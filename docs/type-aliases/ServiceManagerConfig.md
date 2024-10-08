@@ -1,6 +1,6 @@
 [**@lucastraba/service-manager**](../README.md) • **Docs**
 
----
+***
 
 [@lucastraba/service-manager](../globals.md) / ServiceManagerConfig
 
@@ -12,9 +12,9 @@ Configuration object for the initialization of the ServiceManager.
 
 ## Type Parameters
 
-• **TServices** _extends_ `ServiceMap`
+• **TServices** *extends* `ServiceMap`
 
-• **TInstances** _extends_ `ServiceMap` = `TServices`
+• **TInstances** *extends* `ServiceMap` = `TServices`
 
 ## Type declaration
 
@@ -26,4 +26,4 @@ The service definitions that will be available for the loading of the services.
 
 ## Defined in
 
-[src/service-manager/services.type.ts:4](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/services.type.ts#L4)
+[service-manager/service-manager.type.ts:5](https://github.com/lucastraba/service-manager/blob/1f568d8fa4f03055a4ed0e484704c9985f8f7f13/src/service-manager/service-manager.type.ts#L5)

@@ -1,3 +1,7 @@
+**@lucastraba/service-manager** • [**Docs**](globals.md)
+
+***
+
 # Service Manager
 
 The Service Manager is a simple schema-based IoC (Inversion of Control) container for TypeScript.
@@ -17,7 +21,7 @@ making it easier to write modular, testable, and maintainable code.
 - **Lazy Loading**: Service modules are imported asynchronously on-demand
 - **Type Safety**: The Service Manager has been meticulously developed
   to ensure maximum type safety and autocompletion
-- **Lightweight:** Did you know the Service Manager weighs only 7 kB gzipped? It's true!
+- **Lightweight:** Did you know the Service Manager weighs only 6 kB gzipped? It's true!
 - **Zero Dependencies:** The Service Manager has no dependencies,
   so you can expect it to work even if all other libraries collapse
 
@@ -148,12 +152,12 @@ making it easier to write modular, testable, and maintainable code.
 ## Additional Information and Examples
 
 For additional information and examples,
-please refer to the ServiceManager class [TSDocs](./docs/classes/ServiceManager.md) section.
+please refer to the ServiceManager class [TSDocs](_media/ServiceManager.md) section.
 
 ## API Reference
 
 For more information about the API, you can check
-the [TSDocs](./docs/globals.md) section.
+the [TSDocs](_media/globals.md) section.
 
 ## Contributing
 

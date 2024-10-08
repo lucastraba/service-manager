@@ -1,6 +1,6 @@
 [**@lucastraba/service-manager**](../README.md) • **Docs**
 
----
+***
 
 [@lucastraba/service-manager](../globals.md) / ServiceDefinition
 
@@ -13,9 +13,9 @@ optionally a list of post-build asynchronous actions, and a path to the service,
 
 ## Type Parameters
 
-• **TServices** _extends_ `ServiceMap`
+• **TServices** *extends* `ServiceMap`
 
-• **TInstances** _extends_ `ServiceMap` = `TServices`
+• **TInstances** *extends* `ServiceMap` = `TServices`
 
 ## Type declaration
 
@@ -55,4 +55,4 @@ The instance name of the service. If not provided, the `serviceClassName` will b
 
 ## Defined in
 
-[src/service-manager/services.type.ts:16](https://github.com/lucastraba/service-manager/blob/42c879c92f997e373b26f424096c7fe71fc5f9df/src/service-manager/services.type.ts#L16)
+[service-manager/service-manager.type.ts:17](https://github.com/lucastraba/service-manager/blob/1f568d8fa4f03055a4ed0e484704c9985f8f7f13/src/service-manager/service-manager.type.ts#L17)
