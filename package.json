@@ -2,6 +2,24 @@
   "name": "@lucastraba/service-manager",
   "version": "1.0.0",
   "description": "A simple IoC container for TypeScript",
+  "keywords": [
+    "IoC",
+    "Inversion of Control",
+    "Dependency Injection",
+    "TypeScript",
+    "JavaScript",
+    "Container",
+    "Service Manager",
+    "Node.js",
+    "Singleton",
+    "Lazy Loading",
+    "Type Safety",
+    "Zero Dependencies"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucastraba/service-manager.git"
+  },
   "license": "MIT",
   "author": {
     "name": "Lucas Traba",
